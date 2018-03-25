@@ -1,5 +1,13 @@
 #include<pthread.h>
 #include<semaphore.h>
+int readers=0;
+void *writers()
+{
+if(readers==0)
+{
+
+}
+}
 int main()
 {
 
