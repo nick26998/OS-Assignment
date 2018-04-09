@@ -13,7 +13,8 @@ void *reader(int i)
 	pthread_mutex_lock(&reader_lock);
 		
 	reader_count++;
-	//sleep(2);
+	
+	
 	if(reader_count==1) 
 	pthread_mutex_lock(&writer_lock);
 
@@ -25,15 +26,14 @@ void *reader(int i)
 	if(reader_count==0)
 	pthread_mutex_unlock(&writer_lock);
 	pthread_mutex_unlock(&reader_lock);
-	//pthread_exit("0");  
+	pthread_exit("0");  
 	}
 
 
 void *writer(int i)
 {
 
-//int time=srand()%200;
-//usleep(time);
+
 if(reader_count==0)
 {
 pthread_mutex_lock(&writer_lock);
@@ -46,7 +46,7 @@ shared_variable=y;
 pthread_mutex_unlock(&writer_lock);
 
 }
-//pthread_exit("0");
+pthread_exit("0");
 }
 
 
@@ -54,14 +54,27 @@ pthread_mutex_unlock(&writer_lock);
 int main()
 {
 
-pthread_t p[50],q[50];
+pthread_t p[10],q[10];
 int readers,writers,i;
 pthread_mutex_init(&reader_lock,NULL);
 pthread_mutex_init(&writer_lock,NULL);
-printf("Enter the number of readers(max 5) ");
+printf("Enter the number of readers(max 10): ");
 scanf("%d",&readers);
-printf("Enter the number of writers(max 5) ");
+printf("Enter the number of writers(max 10): ");
 scanf("%d",&writers);
+
+if(readers>10 || writers>10) 
+{
+printf("Maximum 10 writers and 10 readers are supported only\n");
+exit(0);
+}
+if(writers<1)
+{
+printf("Minimum writers supported is 1\n");
+exit(0);
+}
+
+
 printf("\n");
 for(i=0;i<writers;i++)
 pthread_create(&p[i],NULL,writer,i);
