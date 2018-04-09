@@ -1,16 +1,78 @@
+#include<stdio.h>
+#include<math.h>
 #include<pthread.h>
-#include<semaphore.h>
-int readers=0;
-void *writers()
-{
-if(readers==0)
+int reader_count=0,shared_variable=0;
+pthread_mutex_t reader_lock,writer_lock;
+
+void *reader(int i)
+  {
+	int time=srand()%200;
+	usleep(time);
+
+	
+	pthread_mutex_lock(&reader_lock);
+		
+	reader_count++;
+	//sleep(2);
+	if(reader_count==1) 
+	pthread_mutex_lock(&writer_lock);
+
+  
+	pthread_mutex_unlock(&reader_lock);
+	 printf("Value read by reader %d is %d\n\n",i+1,shared_variable);
+	pthread_mutex_lock(&reader_lock);
+	reader_count--;
+	if(reader_count==0)
+	pthread_mutex_unlock(&writer_lock);
+	pthread_mutex_unlock(&reader_lock);
+	//pthread_exit("0");  
+	}
+
+
+void *writer(int i)
 {
 
+//int time=srand()%200;
+//usleep(time);
+if(reader_count==0)
+{
+pthread_mutex_lock(&writer_lock);
+int y;
+y=rand()%100;
+printf("Value written by writer %d is %d\n",i+1,y);
+printf("Readers present when writer %d has written: %d\n\n",i+1,reader_count);
+shared_variable=y;
+
+pthread_mutex_unlock(&writer_lock);
+
 }
+//pthread_exit("0");
 }
+
+
+
 int main()
 {
 
+pthread_t p[50],q[50];
+int readers,writers,i;
+pthread_mutex_init(&reader_lock,NULL);
+pthread_mutex_init(&writer_lock,NULL);
+printf("Enter the number of readers(max 5) ");
+scanf("%d",&readers);
+printf("Enter the number of writers(max 5) ");
+scanf("%d",&writers);
+printf("\n");
+for(i=0;i<writers;i++)
+pthread_create(&p[i],NULL,writer,i);
+for(i=0;i<readers;i++)
+pthread_create(&q[i],NULL,reader,i);
+for(i=0;i<writers;i++)
+{
+pthread_join(p[i],NULL);
 
-return 0;
 }
+for(i=0;i<readers;i++)
+pthread_join(q[i],NULL);
+}
+
